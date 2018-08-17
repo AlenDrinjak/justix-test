@@ -1,0 +1,33 @@
+resource "aws_instance" "web01" {
+  # ubuntu ami
+  ami = "ami-2d39803a"
+  instance_type = "t2.micro"
+  vpc_security_group_ids = ["${aws_security_group.web_server_sg.id}"]
+
+  root_block_device {
+    volume_size = "8"
+    delete_on_termination = true
+  }
+
+  associate_public_ip_address = true
+  ebs_optimized = false
+  key_name = "infra_builder"
+
+  tags {
+    Name = "web01"
+  }
+}
+
+resource "aws_ebs_volume" "web01-ebs-volume1" {
+    availability_zone = "us-east-1c"
+    size = "20"
+    type = "gp2"
+    tags {
+        Name = "Data Volume"
+        CreatedBy = "Terraform"
+    }
+}
+
+resource "aws_volume_attachment" "web01-ebs1" {
+    device_name = "/dev/xvdb"
+    volume_id = "${aws_ebs_volume.web01-ebs-vo

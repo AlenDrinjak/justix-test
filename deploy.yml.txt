@@ -1,0 +1,13 @@
+# deploy.yml: Install docker
+---
+- hosts: all
+  gather_facts: yes
+  become: yes
+  become_user: root
+
+  roles:
+    - { role: docker, tags: docker }
+    - python
+
+  tasks:
+    - debug: var=docker_result

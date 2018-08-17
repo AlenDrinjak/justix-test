@@ -1,0 +1,42 @@
+################ DB INSTANCE ###############
+resource "aws_db_instance" "backend_db" {
+    name = "rds_mysql"
+    allocated_storage = 5
+    engine = "mariadb"
+    storage_type = "gp2"
+    instance_class = "db.t2.medium"
+    identifier = "wordpressdb"
+    username = "wpress"
+    password = "wpress_247x"
+    parameter_group_name = "${aws_db_parameter_group.rds_param_group.id}"
+    license_model = "general-public-license"
+
+    # set to 'true' so we can destroy
+    skip_final_snapshot = true
+
+    # network config
+    db_subnet_group_name = "${aws_db_subnet_group.rds_subnet_group.id}"
+    vpc_security_group_ids = ["${aws_security_group.db_server_sg.id}"]
+
+    tags {
+        Name = "Backend Database"
+        CreatedBy = "Terraform"
+    }
+}
+
+################  DB SUBNET  ###############
+resource "aws_db_subnet_group" "rds_subnet_group" {
+    name = "rds subnet group"
+    # us-east-1c, us-east-1d
+    subnet_ids = ["subnet-39d6a014","subnet-7a5c7b33"]
+
+    tags {
+        Name = "RDS Subnet Group"
+        CreatedBy = "Terraform"
+    }
+}
+
+################  DB PARAMS  ###############
+resource "aws_db_parameter_group" "rds_param_group" {
+    name = "wp-db-mariadb10-1"
+    family = "mariadb10.1"

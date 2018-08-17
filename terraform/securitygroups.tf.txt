@@ -1,0 +1,101 @@
+################ GROUPS ###############
+
+# this is your web server GROUP config
+
+resource "aws_security_group" "web_server_sg" {
+    name = "web_server_security"
+    description = "ALLOW inbound traffic to web server"
+    vpc_id = "vpc-534cfe35"
+
+    tags {
+        Name = "web_sg"
+        CreatedBy = "Terraform"
+    }
+}
+
+# this is your RDS database GROUP config
+
+resource "aws_security_group" "db_server_sg" {
+    name = "rds_server_security"
+    description = "ALLOW inbound traffic to RDS/MySQL"
+    vpc_id = "vpc-534cfe35"
+
+    tags {
+        Name = "db_sg"
+        CreatedBy = "Terraform"
+    }
+}
+
+################ WEB RULES ###############
+
+# the following are security group RULES you add
+# to the security GROUP
+
+resource "aws_security_group_rule" "ssh" {
+    type = "ingress"
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+# add to the WEB GROUP above
+    security_group_id = "${aws_security_group.web_server_sg.id}"
+}
+
+resource "aws_security_group_rule" "web_http" {
+    type = "ingress"
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+
+    # add to the WEB GROUP above
+    security_group_id = "${aws_security_group.web_server_sg.id}"
+}
+
+resource "aws_security_group_rule" "web_https" {
+    type = "ingress"
+    from_port = 443
+    to_port = 443
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+
+    # add to the WEB GROUP above
+    security_group_id = "${aws_security_group.web_server_sg.id}"
+}
+
+resource "aws_security_group_rule" "anywhere_outbound" {
+    type = "egress"
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+
+    # add to the WEB GROUP above
+    security_group_id = "${aws_security_group.web_server_sg.id}"
+}
+
+################ DB RULES ###############
+
+resource "aws_security_group_rule" "db_rds_sg-1" {
+    type = "ingress"
+    from_port = "3306"
+    to_port = "3306"
+    protocol = "tcp"
+
+    # allow inbound from the WEB GROUP
+    source_security_group_id = "${aws_security_group.web_server_sg.id}"
+
+    # references the DB GROUP above
+    security_group_id = "${aws_security_group.db_server_sg.id}"
+}
+
+resource "aws_security_group_rule" "db_rds_sg-2" {
+    type = "egress"
+    from_port = "0"
+    to_port = "0"
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+
+    # references the DB GROUP above
+    security_group_id = "${aws_security_group.db_server_sg.id}"
+}

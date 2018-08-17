@@ -1,0 +1,6 @@
+output "ec2_public_ips" {
+  value = ["${aws_instance.web01.*.public_ip}"]
+}
+
+output "rds_mysql_db_name" {
+  value = "${aws_db_instance.backend_db.address}"
