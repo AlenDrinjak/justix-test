@@ -1,0 +1,12 @@
+---
+# defaults file for docker
+# this assumes either systemd or initd services
+# uncomment the one you need:
+
+## systemd
+#docker_service: /usr/lib/systemd/system/docker.service
+
+## initd
+docker_service: /etc/init.d/docker
+docker_install_docker_compose: True
+docker_compose_version: "1.21.0"

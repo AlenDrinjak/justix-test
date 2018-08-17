@@ -1,0 +1,28 @@
+---
+# tasks file for docker
+
+- name: check docker installed
+  stat: path=
+  register: install_result
+
+- debug: var=install_result
+
+- name: installing docker
+  shell: >
+    curl -fsSL https://get.docker.com/ | sh
+  when: not install_result.stat.exists
+
+- name: start docker service
+  service: name=docker state=started enabled=true
+
+- name: get docker_info
+  no_log: true
+  command: docker info
+  register: docker_result
+
+# sudo apt-get install docker-compose=1.8.*
+- name: Install docker-compose
+  apt:
+    name: docker-compose=1.8.*
+    state: present
+    update_cache: yes
